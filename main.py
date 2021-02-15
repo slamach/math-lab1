@@ -10,14 +10,13 @@ def getmat_file():
             n = int(fin.readline())
             matrix = []
             for line in fin:
-                new_row = list(map(int, line.strip().split()))
+                new_row = list(map(float, line.strip().split()))
                 if len(new_row) != (n + 1):
                     raise ValueError
                 matrix.append(new_row)
             if len(matrix) != n:
                 raise ValueError
         except ValueError:
-            print("При считывании файла произошла ошибка!")
             return None
     return matrix
 
@@ -37,18 +36,73 @@ def getmat_input():
     print("Коэффициенты матрицы:")
     try:
         for i in range(n):
-            matrix.append(list(map(int, input().strip().split())))
+            matrix.append(list(map(float, input().strip().split())))
             if len(matrix[i]) != (n + 1):
                 raise ValueError
     except ValueError:
-        print("При считывании коэффициентов матрицы произошла ошибка!")
         return None
     return matrix
 
 
+def solve_minor(matrix, i, j):
+    n = len(matrix)
+    return [[matrix[row][col] for col in range(n) if col != j] for row in range(n) if row != i]
+
+
+def solve_det(matrix):
+    n = len(matrix)
+    if n == 1:
+        return matrix[0][0]
+    det = 0
+    sgn = 1
+    for j in range(n):
+        det += sgn * matrix[0][j] * solve_det(solve_minor(matrix, 0, j))
+        sgn *= -1
+    return det
+
+
 def solve(matrix):
-    # TODO: Реализовать алгоритм решения
-    print(matrix)
+    n = len(matrix)
+    det = solve_det([matrix[i][:n] for i in range(n)])
+    if det == 0:
+        return None
+    # Прямой ход
+    for i in range(n - 1):
+        # Поиск максимального элемента в столбце
+        max_i = i
+        for j in range(i + 1, n):
+            if abs(matrix[j][i]) > abs(matrix[max_i][i]):
+                max_i = j
+
+        # Перестановка строк
+        if max_i != i:
+            for j in range(n + 1):
+                matrix[i][j], matrix[max_i][j] = matrix[max_i][j], matrix[i][j]
+
+        # Исключение i-того неизвестного
+        for k in range(i + 1, n):
+            coef = matrix[k][i] / matrix[i][i]
+            for j in range(i, n + 1):
+                matrix[k][j] -= coef * matrix[i][j]
+
+        reduced_matrix = matrix[:]
+    # Обратный ход
+    roots = [0] * n
+    for i in range(n - 1, -1, -1):
+        s_part = 0
+        for j in range(i + 1, n):
+            s_part += matrix[i][j] * roots[j]
+        roots[i] = (matrix[i][n] - s_part) / matrix[i][i]
+
+    # Вычисление невязок
+    residuals = [0] * n
+    for i in range(n):
+        s_part = 0
+        for j in range(n):
+            s_part += matrix[i][j] * roots[j]
+        residuals[i] = s_part - matrix[i][n]
+
+    return reduced_matrix, roots, residuals
 
 
 def main():
@@ -67,9 +121,24 @@ def main():
         matrix = getmat_input()
 
     if matrix is None:
+        print("При считывании коэффициентов матрицы произошла ошибка!")
         return
 
-    solve(matrix)
+    reduced_matrix, roots, residuals = solve(matrix[:])
+
+    print("\nПреобразованная матрица:")
+    for row in reduced_matrix:
+        for col in row:
+            print('{:10}'.format(round(col, 3)), end='')
+        print()
+
+    print("\nВектор неизвестных:")
+    for root in roots:
+        print('  ' + str(root))
+
+    print("\nВектор невязок:")
+    for residual in residuals:
+        print('  ' + str(residual))
 
 
 main()
