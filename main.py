@@ -66,6 +66,7 @@ def solve(matrix):
     det = solve_det([matrix[i][:n] for i in range(n)])
     if det == 0:
         return None
+
     # Прямой ход
     for i in range(n - 1):
         # Поиск максимального элемента в столбце
@@ -85,7 +86,8 @@ def solve(matrix):
             for j in range(i, n + 1):
                 matrix[k][j] -= coef * matrix[i][j]
 
-        reduced_matrix = matrix[:]
+    reduced_matrix = matrix[:]
+
     # Обратный ход
     roots = [0] * n
     for i in range(n - 1, -1, -1):
@@ -102,7 +104,7 @@ def solve(matrix):
             s_part += matrix[i][j] * roots[j]
         residuals[i] = s_part - matrix[i][n]
 
-    return reduced_matrix, roots, residuals
+    return det, reduced_matrix, roots, residuals
 
 
 def main():
@@ -124,7 +126,14 @@ def main():
         print("При считывании коэффициентов матрицы произошла ошибка!")
         return
 
-    reduced_matrix, roots, residuals = solve(matrix[:])
+    answer = solve(matrix[:])
+    if answer is None:
+        print("\nМатрица является несовместной.")
+        return
+    det, reduced_matrix, roots, residuals = answer
+
+    print("\nОпределитель:")
+    print(det)
 
     print("\nПреобразованная матрица:")
     for row in reduced_matrix:
