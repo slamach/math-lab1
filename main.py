@@ -5,6 +5,7 @@ FILE_IN = "iofiles/input.txt"
 
 
 def getmat_file():
+    """ Получить матрицу из файла """
     with open(FILE_IN, 'rt') as fin:
         try:
             n = int(fin.readline())
@@ -22,6 +23,7 @@ def getmat_file():
 
 
 def getmat_input():
+    """ Получить матрицу с клавиатуры """
     print("Вводите коэффициенты матрицы через пробел строка за строкой.")
     while True:
         try:
@@ -45,11 +47,13 @@ def getmat_input():
 
 
 def solve_minor(matrix, i, j):
+    """ Найти минор элемента матрицы """
     n = len(matrix)
     return [[matrix[row][col] for col in range(n) if col != j] for row in range(n) if row != i]
 
 
 def solve_det(matrix):
+    """ Найти определитель матрицы """
     n = len(matrix)
     if n == 1:
         return matrix[0][0]
@@ -62,6 +66,7 @@ def solve_det(matrix):
 
 
 def solve(matrix):
+    """ Метод Гаусса с выбором главного элемента по столбцам """
     n = len(matrix)
     det = solve_det([matrix[i][:n] for i in range(n)])
     if det == 0:
@@ -71,9 +76,9 @@ def solve(matrix):
     for i in range(n - 1):
         # Поиск максимального элемента в столбце
         max_i = i
-        for j in range(i + 1, n):
-            if abs(matrix[j][i]) > abs(matrix[max_i][i]):
-                max_i = j
+        for m in range(i + 1, n):
+            if abs(matrix[m][i]) > abs(matrix[max_i][i]):
+                max_i = m
 
         # Перестановка строк
         if max_i != i:
@@ -108,7 +113,7 @@ def solve(matrix):
 
 
 def main():
-    print("\t\t\tЛабораторная работа #1 (19)")
+    print("\t\tЛабораторная работа #1 (19)")
     print("Метод Гаусса с выбором главного элемента по столбцам")
     print("\nВзять коэффициенты из файла (+) или ввести с клавиатуры (-)?")
 
